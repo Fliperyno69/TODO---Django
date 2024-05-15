@@ -1,0 +1,61 @@
+{% load task_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome, {{ request.user.username }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .task-completed {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Welcome, {{ request.user.username }}!</h1>
+    <p>Here's your task list:</p>
+    <a href="{% url 'task_create' %}" class="btn btn-primary mb-3">Create Task</a>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% load task_tags %}
+        {% for task in tasks %}
+            <tr>
+                <td>{{ task.description }}</td>
+                {% due_date_class task.due_date as status_class %}
+                <td class="{{ status_class }}">{{ task.due_date|date:"Y-m-d" }}</td>
+                <td>{{ task.completed|yesno:"Done,Pending" }}</td>
+                <td>
+                    <a href="{% url 'task_update' task.id %}" class="btn btn-info btn-sm">Edit</a>
+                    {% if not task.completed %}
+                        <form action="{% url 'task_complete' task.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">Complete</button>
+                        </form>
+                    {% endif %}
+                    <a href="{% url 'task_delete' task.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">No tasks available.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'login' %}" class="btn btn-danger">Log Out</a>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
